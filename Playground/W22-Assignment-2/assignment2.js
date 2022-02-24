@@ -22,23 +22,6 @@ class Cube extends Shape {
     }
 }
 
-class Cube_Outline extends Shape {
-    constructor() {
-        super("position", "color");
-        //  TODO (Requirement 5).
-        // When a set of lines is used in graphics, you should think of the list entries as
-        // broken down into pairs; each pair of vertices will be drawn as a line segment.
-        // Note: since the outline is rendered with Basic_shader, you need to redefine the position and color of each vertex
-    }
-}
-
-class Cube_Single_Strip extends Shape {
-    constructor() {
-        super("position", "normal");
-        // TODO (Requirement 6)
-    }
-}
-
 
 class Base_Scene extends Scene {
     /**
@@ -52,7 +35,6 @@ class Base_Scene extends Scene {
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
             'cube': new Cube(),
-            'outline': new Cube_Outline(),
         };
 
         // *** Materials
@@ -97,53 +79,47 @@ export class Assignment2 extends Base_Scene {
         this.right = 0;
         this.left = 0;
     }
-    
-    set_colors() {
-        // TODO:  Create a class member variable to store your cube's colors.
-        // Hint:  You might need to create a member variable at somewhere to store the colors, using `this`.
-        // Hint2: You can consider add a constructor for class Assignment2, or add member variables in Base_Scene's constructor.
-    }
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
         this.key_triggered_button("W", ["y"], () => {
-            this.forward = 1;
+            this.forward += 0.3;
         });
         this.key_triggered_button("A", ["g"], () => {
-            this.left = 1;
+            this.left += 0.3;
         });
         this.key_triggered_button("S", ["h"], () => {
-            this.backward = 1;
+            this.backward += 0.3;
         });
         this.key_triggered_button("D", ["j"], () => {
-            this.right = 1;
+            this.right += 0.3;
         });
     }
 
     draw_box(context, program_state, model_transform) {
         const blue = hex_color("#1a9ffa");        
         let t = program_state.animation_time/1000;
-        let rotation;
-        model_transform = Mat4.translation((this.forward + this.backward), (this.right + this.left), 0).times(model_transform);
+        model_transform = Mat4.translation(5 + (this.right - this.left), (this.forward - this.backward), 0).times(model_transform);
         this.shapes.cube.draw(context, program_state, model_transform, 
                                   this.materials.plastic.override({color: blue}));
-        
-        this.forward, this.backward, this.right, this.left = 0;
-        
-        // TODO:  Helper function for requirement 3 (see hint).
-        //        This should make changes to the model_transform matrix, draw the next box, and return the newest model_transform.
-        // Hint:  You can add more parameters for this function, like the desired color, index of the box, etc.
-
         return model_transform;
     }
 
+    draw_scooter(context, program_state, model_transform) {
+        const yellow = hex_color("#ffff00");        
+        let t = program_state.animation_time/1000;
+        model_transform = Mat4.translation(0 - 3 * t, 5, 0);
+        this.shapes.cube.draw(context, program_state, model_transform, 
+                                  this.materials.plastic.override({color: yellow}));
+        return model_transform;
+    }
+    
     display(context, program_state) {
         super.display(context, program_state);
-        const blue = hex_color("#1a9ffa");
         let model_transform = Mat4.identity();
-
         // Example for drawing a cube, you can remove this line if needed
         model_transform = this.draw_box(context, program_state, model_transform);
+        model_transform = this.draw_scooter(context, program_state, model_transform);
         // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
     }
 }
